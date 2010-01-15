@@ -1,0 +1,3 @@
+load smallExample 
+nodeColors = {'g','b','r','c'}; % if too few specified, it will cycle through
+graphViz4Matlab('-adjMat',adj,'-nodeLabels',names,'-layout',Treelayout,'-nodeColors',nodeColors);
