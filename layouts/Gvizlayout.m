@@ -1,5 +1,5 @@
 classdef Gvizlayout < Abstractlayout
-% Use the graphVIZ package to determine the optimal layout for a smartgraph
+% Use the graphVIZ package to determine the optimal layout for a graph.
 %
 % Matthew Dunham
 % University of British Columbia 
