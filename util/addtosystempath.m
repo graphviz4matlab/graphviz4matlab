@@ -3,7 +3,7 @@ function addtosystempath(p)
 % Note, this change only persists for the duration of the Matlab session.
 % Do not include path delimiters like ; or : .
 % Example:
-% addtopath('C:\Users\matt\bin');
+% addtosystempath('C:\Users\matt\bin');
     
     if isempty(getenv('PATH')) || all(cellfun(@(c)isempty(c),strfind(tokenize(getenv('PATH'),pathsep()),p)));
         setenv('PATH', [getenv('PATH'), pathsep(),p]);

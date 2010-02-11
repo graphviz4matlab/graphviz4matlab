@@ -82,6 +82,7 @@ classdef graphViz4Matlab < handle
     properties(GetAccess = 'public', SetAccess = 'private')
     % read only
        path         = addpath(genpath(fileparts(which(mfilename))));  % automatically adds subdirectories to path
+       graphVizPath = setupPath(); 
        nnodes       = 0;      % The number of nodes
        nedges       = 0;      % The number of edges
        currentLayout= [];     % The current layout object
