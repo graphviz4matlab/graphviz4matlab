@@ -1,3 +1,4 @@
+function adj2pajek2(adj,filename, varargin)
 % ADJ2PAJEK2 Converts an adjacency matrix representation to a Pajek .net read format
 % adj2pajek2(adj, filename-stem, 'argname1', argval1, ...)
 %
@@ -35,8 +36,6 @@
 % http://stuff.mit.edu/people/gerganaa/www/matlab/routines.html
 % Fixes a small bug (opens files as 'wt' instead of 'w' so it works in windows)
 % Also, simplified her code and added some features.
-
-function []=adj2pajek2(adj,filename, varargin)
 
 N = length(adj);
 for i=1:N
