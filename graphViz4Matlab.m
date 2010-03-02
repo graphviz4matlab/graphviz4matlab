@@ -64,6 +64,10 @@ classdef graphViz4Matlab < handle
 % '-splitLabels'       [true] If true, long node labels are split into
 %                       several rows
 %
+% '-doubleClickFn'     (by default, double clicking a node brings up 
+%                      an edit box for the node's description, but you
+%                      can pass in a custom function handle. The function
+%                      gets passed the node's label.
 % Examples:
 % 
 % adj = rand(5,5) > 0.8;
@@ -306,12 +310,21 @@ classdef graphViz4Matlab < handle
         
         function processInputs(obj,varargin)
         % Process the inputs and perform error checking    
-            %inputs = varargin;
-            %if(numel(varargin)==1), inputs = ['adjMatrix',varargin];end
-           
+            labels = {'adj', 'adjMatrix', 'adjMat', 'layout', 'nodeLabels', 'nodeDescriptions', 'nodeColors', 'undirected', 'edgeColors', 'splitLabels', 'doubleClickFn'};
+            for i=1:numel(varargin)
+                arg = varargin{i};
+                if ~ischar(arg), continue; end
+                for j = 1:numel(labels)
+                    if strcmpi(arg, labels{i});
+                        varargin{i} = ['-', arg];
+                    end
+                    if strcmpi(arg, '-adj') || strcmpi(arg, '-adjMatrix')
+                        varargin{i} = '-adjMat';
+                    end
+                end
+            end
             
-            
-            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors,obj.undirected,obj.edgeColors,obj.splitLabels,obj.doubleClickFn] = processArgs(varargin,...
+            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors,obj.undirected,obj.edgeColors,obj.splitLabels,obj.doubleClickFn] = processArgs(varargin,... 
                 '-adjMat'               , []     ,...
                 '-layout'               , []     ,...
                 '-nodeLabels'           , {}     ,...
@@ -320,7 +333,7 @@ classdef graphViz4Matlab < handle
                 '-undirected'           , false  ,...
                 '-edgeColors'           , []     ,...
                 '-splitLabels'          , true   ,...
-                '-doubleClickFn'        , []     );
+                '-doubleClickFn'        , []     ); 
             
             
             if(~isempty(currentLayout) && ~isavailable(currentLayout))
