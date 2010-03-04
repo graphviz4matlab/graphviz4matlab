@@ -83,3 +83,4 @@ N = 100; part = ones(1,N); part(intersect(reg.tfidxTest,1:N))=2;
 G = reg.Atest(1:N, 1:N)';
 adj2pajek2(G, 'Ecoli100', 'partition', part)
 end
+end
