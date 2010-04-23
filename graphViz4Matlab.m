@@ -993,8 +993,33 @@ classdef graphViz4Matlab < handle
               node.fontSize = newsize;
               node.redraw();
            end
-        end
+         end
         
+         function XY = getNodePositions(obj)
+         % Return the current positions of the nodes. The bottom left
+         % corner is [0 0] and the top right is [1 1]. Node positions
+         % refer to the centre of a node. 
+             XY = zeros(obj.nnodes, 2); 
+             for i=1:obj.nnodes
+                XY(i, 1) = obj.nodeArray(i).xpos;
+                XY(i, 2) = obj.nodeArray(i).ypos; 
+             end
+         end
+        
+         function setNodePositions(obj, XY)
+         % Programmatically set the node positions
+         % XY(i, 1) is the xposition of node i, XY(i, 2) is the yposition. 
+            for i=1:obj.nnodes
+               obj.nodeArray(i).move(XY(i, 1), XY(i, 2));  
+            end
+            obj.displayGraph();     
+         end
+         
+         function moveNode(obj, nodeIndex, xpos, ypos)
+         % Programmatically set a node position. 
+             obj.nodeArray(nodeIndex).move(xpos, ypos); 
+             obj.displayGraph(); 
+         end
+         
     end
-   
 end
