@@ -6,7 +6,7 @@ classdef graphViz4Matlab < handle
 %
 % Matthew Dunham
 % University of British Columbia 
-% Last Updated: January 14th, 2010
+% Last Updated: April 24, 2010
 % Requires Matlab version 2008a or newer.
 % 
 % Syntax (see more examples below):
