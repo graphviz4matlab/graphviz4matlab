@@ -132,7 +132,8 @@ classdef Gvizlayout < Abstractlayout
    methods(Access = 'protected',Static = true)
       
        function available = queryGviz(name)
-            err = system([name,' -V']);
+            %err = system([name,' -V']);
+            [j, err] = evalc('system([name,'' -V'']);');
             available = ~err;
        end
        
