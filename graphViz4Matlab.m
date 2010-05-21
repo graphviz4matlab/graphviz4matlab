@@ -143,7 +143,7 @@ classdef graphViz4Matlab < handle
         
         function obj = graphViz4Matlab(varargin)
             % graphViz4Matlab constructor
-            if(~exist('processArgs','file')), error('Requires processArgs() function');            end
+            if(~exist('processArgsGV','file')), error('Requires processArgsGV() function');            end
             obj.addKnownLayouts();
             obj.processInputs(varargin{:})
             obj.addNodes();
@@ -324,7 +324,7 @@ classdef graphViz4Matlab < handle
                 end
             end
             
-            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors,obj.undirected,obj.edgeColors,obj.splitLabels,obj.doubleClickFn] = processArgs(varargin,...
+            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors,obj.undirected,obj.edgeColors,obj.splitLabels,obj.doubleClickFn] = processArgsGV(varargin,...
                 '-adjMat'               , []     ,...
                 '-layout'               , []     ,...
                 '-nodeLabels'           , {}     ,...
@@ -549,11 +549,11 @@ classdef graphViz4Matlab < handle
                 hold on;
                 edgeColor = obj.defaultEdgeColor;
                 if ~isempty(obj.edgeColors)
-                    candidates = obj.edgeColors(findString(edge.from.label,obj.edgeColors(:,1)),:);
+                    candidates = obj.edgeColors(findStringGV(edge.from.label,obj.edgeColors(:,1)),:);
                     if size(candidates,1)==1 && strcmpi(candidates(1,2),'all')
                         edgeColor = candidates{1,3};
                     else
-                        edgeCol = candidates(findString(edge.to.label,candidates(:,2)),3);
+                        edgeCol = candidates(findStringGV(edge.to.label,candidates(:,2)),3);
                         if ~isempty(edgeCol); edgeColor = edgeCol{1}; end
                     end
                 end

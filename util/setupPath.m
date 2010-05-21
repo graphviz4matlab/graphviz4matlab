@@ -7,6 +7,6 @@ function gvizPath = setupPath()
     end
     try  %#ok
         gvizPath = winqueryreg('HKEY_LOCAL_MACHINE','SOFTWARE\AT&T Research Labs\Graphviz', 'InstallPath');
-        addtosystempath(fullfile(gvizPath, 'bin'));
+        addtosystempathGV(fullfile(gvizPath, 'bin'));
     end
 end
