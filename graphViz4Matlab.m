@@ -694,7 +694,7 @@ classdef graphViz4Matlab < handle
         
         function setFontSize(obj)
             % fontsize = obj.maxFontSize;
-            fontSize = 20;
+            fontSize = 30;
             maxchars = size(char(obj.nodeLabels),2);
             width = obj.nodeArray(1).width;
             height = obj.nodeArray(1).height;
