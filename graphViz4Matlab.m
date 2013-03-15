@@ -52,6 +52,12 @@ classdef graphViz4Matlab < handle
     %
     % '-undirected'        [false] If true, no arrows are displayed.
     %
+    % '-edgeLabels'        [] An n-by-3 cell array listing
+    %                         {fromName,toName,color} for each row. You can
+    %                         list only the n < numel(edges) edges you want to
+    %                         label. If you do not label the nodes, graphViz4Matlab
+    %                         uses '1','2','3', etc, in which case use these.
+    %
     % '-edgeColors'        [] An n-by-3 cell array listing
     %                         {fromName,toName,color} for each row. You can
     %                         list only the n < numel(edges) edges you want to
@@ -60,6 +66,7 @@ classdef graphViz4Matlab < handle
     %                         You can specify the text 'all' in place of toName,
     %                         to mean all nodes, i.e. {fromName,'all',color}
     %
+    % '-edgeLineStyle'     ['-'] A Matlab line style used for plotting the edges
     %
     % '-splitLabels'       [true] If true, long node labels are split into
     %                       several rows
@@ -103,18 +110,18 @@ classdef graphViz4Matlab < handle
         maxNodeSize  = [];     % A maximum size for the nodes
         undirected   = false;  % If undirected, arrows are not displayed
         flipped      = false;  % If true, layout is done as though edge directions were reversed.
-                               % (does not affect the logical layout).
-        knownLayouts = {   ...
-            Gvizlayout    , ...   % add your own layout here or use
-            Treelayout    , ...   % the addLayout() method
-            Radiallayout  , ...
-            Circularlayout, ...
-            Springlayout  , ...
-            Circlelayout  , ...
-            Gridlayout    , ...
+        % (does not affect the logical layout).
+        knownLayouts = {Gvizlayout  ,...   % add your own layout here or use
+            Treelayout  ,...   % the addLayout() method
+            Radiallayout,...
+            Circularlayout,...
+            Springlayout,...
+            Circlelayout,...
+            Gridlayout  ,...
             Randlayout  };
-        defaultEdgeColor  = [0, 0, 0];%[20,43,140]/255;
+        defaultEdgeColor  = [0,0,0];%[20,43,140]/255;
         edgeColors;
+        edgeLineStyle;
         square      = true;  % amounts to a the call "axis square"
         splitLabels = true;
     end
@@ -122,6 +129,7 @@ classdef graphViz4Matlab < handle
     properties(GetAccess = 'private', SetAccess = 'private')
         % These values store the initial values not the current ones.
         nodeLabels          = {};
+        edgeLabels          = {};
         nodeDescriptions    = {};
         nodeColors          = {};
     end
@@ -143,7 +151,7 @@ classdef graphViz4Matlab < handle
         
         function obj = graphViz4Matlab(varargin)
             % graphViz4Matlab constructor
-            if(~exist('processArgsGV','file')), error('Requires processArgsGV() function');            end
+            if(~exist('processArgs','file')), error('Requires processArgs() function');            end
             obj.addKnownLayouts();
             obj.processInputs(varargin{:})
             obj.addNodes();
@@ -310,7 +318,7 @@ classdef graphViz4Matlab < handle
         
         function processInputs(obj,varargin)
             % Process the inputs and perform error checking
-            labels = {'adj', 'adjMatrix', 'adjMat', 'layout', 'nodeLabels', 'nodeDescriptions', 'nodeColors', 'undirected', 'edgeColors', 'splitLabels', 'doubleClickFn'};
+            labels = {'adj', 'adjMatrix', 'adjMat', 'layout', 'nodeLabels', 'nodeDescriptions', 'nodeColors', 'undirected', 'edgeLabels', 'edgeColors', 'splitLabels', 'doubleClickFn'};
             for i=1:numel(varargin)
                 arg = varargin{i};
                 if ~ischar(arg), continue; end
@@ -324,14 +332,16 @@ classdef graphViz4Matlab < handle
                 end
             end
             
-            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors,obj.undirected,obj.edgeColors,obj.splitLabels,obj.doubleClickFn] = processArgsGV(varargin,...
+            [adjMatrix, currentLayout, nodeLabels, nodeDescriptions, nodeColors, obj.undirected, edgeLabels, obj.edgeColors, obj.edgeLineStyle, obj.splitLabels, obj.doubleClickFn] = processArgs(varargin,...
                 '-adjMat'               , []     ,...
                 '-layout'               , []     ,...
                 '-nodeLabels'           , {}     ,...
                 '-nodeDescriptions'     , {}     ,...
                 '-nodeColors'           , {}     ,...
                 '-undirected'           , false  ,...
+                '-edgeLabels'           , {}     ,...
                 '-edgeColors'           , []     ,...
+                '-edgeLineStyle'        , '-'    ,...
                 '-splitLabels'          , true   ,...
                 '-doubleClickFn'        , []     );
             
@@ -365,6 +375,10 @@ classdef graphViz4Matlab < handle
             if(~isequal(numel(obj.nodeLabels),size(adjMatrix,1),size(adjMatrix,2)))
                 error('graphViz4Matlab:dimMismatch','The number of labels must match the dimensions of adjmatrix.');
             end
+            obj.edgeLabels = edgeLabels;
+            % if(~isequal(numel(obj.edgeLabels),obj.nedges)) % not yet available
+            %     error('graphViz4Matlab:dimMismatch','The number of labels must match the dimensions of adjmatrix.');
+            % end
             obj.currentLayout = currentLayout;
         end
         
@@ -463,12 +477,12 @@ classdef graphViz4Matlab < handle
                 fprintf('\nRemoving Self Loops\n');
                 obj.adjMatrix = obj.adjMatrix - diag(diag(obj.adjMatrix));
             end
-            obj.edgeArray = struct('from',[],'to',[],'arrow',[]);
+            obj.edgeArray = struct('from',[],'to',[],'arrow',[],'label',[]);
             counter = 1;
             for i=1:obj.nnodes
                 for j=1:obj.nnodes
                     if(obj.adjMatrix(i,j))
-                        obj.edgeArray(counter) = struct('from',obj.nodeArray(i),'to',obj.nodeArray(j),'arrow',-1);
+                        obj.edgeArray(counter) = struct('from',obj.nodeArray(i),'to',obj.nodeArray(j),'arrow',-1,'label',[]);
                         obj.nodeArray(i).outedges = [obj.nodeArray(i).outedges,counter];
                         obj.nodeArray(j).inedges =  [obj.nodeArray(j).inedges,counter];
                         counter = counter + 1;
@@ -546,22 +560,34 @@ classdef graphViz4Matlab < handle
                 if(ishandle(edge.arrow))
                     delete(edge.arrow)
                 end
+                if(ishandle(edge.label))
+                    delete(edge.label)
+                end
                 hold on;
                 edgeColor = obj.defaultEdgeColor;
                 if ~isempty(obj.edgeColors)
-                    candidates = obj.edgeColors(findStringGV(edge.from.label,obj.edgeColors(:,1)),:);
+                    candidates = obj.edgeColors(findString(edge.from.label,obj.edgeColors(:,1)),:);
                     if size(candidates,1)==1 && strcmpi(candidates(1,2),'all')
                         edgeColor = candidates{1,3};
                     else
-                        edgeCol = candidates(findStringGV(edge.to.label,candidates(:,2)),3);
+                        edgeCol = candidates(findString(edge.to.label,candidates(:,2)),3);
                         if ~isempty(edgeCol); edgeColor = edgeCol{1}; end
                     end
                 end
-                edge.arrow = plot(X,Y,'LineWidth',2,'HitTest','off','Color',edgeColor);
+                edge.arrow = plot(X,Y,'LineStyle',obj.edgeLineStyle,'LineWidth',2,'HitTest','off','Color',edgeColor);
                 if(~obj.undirected)
                     arrowHead = obj.displayArrowHead(X,Y,Xarrow,Yarrow,edgeColor);
                     edge.arrow = [edge.arrow arrowHead];
                 end
+                edgeLabel = ''; 
+                if ~isempty(obj.edgeLabels)
+                    candidates = obj.edgeLabels(findString(edge.from.label,obj.edgeLabels(:,1)),:);
+                    edgeLab = candidates(findString(edge.to.label,candidates(:,2)),3);
+                    if ~isempty(edgeLab); edgeLabel = edgeLab{1}; end
+                end
+                normal = [diff(Y); - diff(X)];
+                normal = normal / norm(normal);
+                edge.label = text(mean(X)+0.02*normal(1),mean(Y)+0.02*normal(2),edgeLabel,'FontSize',round(obj.fontSize*2/3),'HorizontalAlignment','center','Rotation',-90+atan2(normal(2),normal(1))*180/pi);
                 hold off;
                 obj.edgeArray(indices(i)) = edge;
             end
@@ -694,7 +720,7 @@ classdef graphViz4Matlab < handle
         
         function setFontSize(obj)
             % fontsize = obj.maxFontSize;
-            fontSize = 30;
+            fontSize = 20;
             maxchars = size(char(obj.nodeLabels),2);
             width = obj.nodeArray(1).width;
             height = obj.nodeArray(1).height;
