@@ -1,4 +1,4 @@
-function varargout = processArgsGV(userArgs, varargin)    
+function varargout = processArgs(userArgs, varargin)    
 % Process function arguments, allowing args to be passed by
 % the user either as name/value pairs, or positionally, or both. 
 %
@@ -12,7 +12,7 @@ function varargout = processArgsGV(userArgs, varargin)
 %
 %% USAGE:
 %
-% [out1,out2,...,outN] = processArgsGV(userArgs ,...
+% [out1,out2,...,outN] = processArgs(userArgs ,...
 % '-name1' , default1                         ,...
 % '-name2' , default2                         ,...
 % '-nameN' , defaultN                         );
@@ -30,7 +30,7 @@ function varargout = processArgsGV(userArgs, varargin)
 % To ensure that certain arguments are passed in, (and error if not), add a
 % '*' character to the corresponding name as in
 %
-% [out1,...] = processArgsGV(userArgs,'*-name1',default1,...
+% [out1,...] = processArgs(userArgs,'*-name1',default1,...
 %
 %
 % Providing empty values, (e.g. {},[],'') for required arguments also
@@ -40,15 +40,15 @@ function varargout = processArgsGV(userArgs, varargin)
 % To enforce that the input type, (class) is the same type as the default
 % value, add a '+' character to the corresponding name as in
 %
-% [out1,...] = processArgsGV(userArgs,'+-name1',default1,...
+% [out1,...] = processArgs(userArgs,'+-name1',default1,...
 %
 % '+' and '*' can be combined as in
 %
-% [out1,...] = processArgsGV(userArgs,'*+-name1',default1,...
+% [out1,...] = processArgs(userArgs,'*+-name1',default1,...
 %
 % or equivalently
 %
-% [out1,...] = processArgGV(userArgs,'+*-name1',default1,...
+% [out1,...] = processArg(userArgs,'+*-name1',default1,...
 %% OTHER CONSIDERATIONS
 %
 % If the user passes in arguments in positional mode, and uses [], {}, or
@@ -88,7 +88,7 @@ function varargout = processArgsGV(userArgs, varargin)
 % 
 % 
 % function [a,b,c,d] = outerFunction(obj,varargin)
-%   [a,b,c,d] = processArgsGV(varargin ,...
+%   [a,b,c,d] = processArgs(varargin ,...
 %   '*-first'       , []             ,...
 %   '*+-second'     , MvnDist()      ,...
 %   '-third'        , 18             ,...
@@ -106,14 +106,14 @@ function varargout = processArgsGV(userArgs, varargin)
 %% PROCESS VARARGIN - PASSED BY PROGRAMMER
     
     %% Check Initial Inputs
-    if ~iscell(userArgs)                                                   ,throwAsCaller(MException('PROCESSARGSGV:noUserArgs','PROGRAMMER ERROR - you must pass in the user''s arguments in a cell array as in processArgsGV(varargin,''-name'',val,...)'));end
-    if isempty(varargin)                                                   ,throwAsCaller(MException('PROCESSARGSGV:emptyVarargin','PROGRAMMER ERROR - you have not passed in any name/default pairs to processArgsGV'));  end
+    if ~iscell(userArgs)                                                   ,throwAsCaller(MException('PROCESSARGS:noUserArgs','PROGRAMMER ERROR - you must pass in the user''s arguments in a cell array as in processArgs(varargin,''-name'',val,...)'));end
+    if isempty(varargin)                                                   ,throwAsCaller(MException('PROCESSARGS:emptyVarargin','PROGRAMMER ERROR - you have not passed in any name/default pairs to processArgs'));  end
     %% Extract Programmer Argument Names and Markers
     progArgNames  = varargin(1:2:end);
     maxNargs  = numel(progArgNames);
     required  = cellfun(@(c)any(REQ==c(1:min(3,end))),progArgNames);
     typecheck = cellfun(@(c)any(TYPE==c(1:min(3,end))),progArgNames); 
-    if ~iscellstr(progArgNames)                                            ,throwAsCaller(MException('PROCESSARGS:notCellStr ',sprintf('PROGRAMMER ERROR - you must pass to processArgsGV name/default pairs'))); end
+    if ~iscellstr(progArgNames)                                            ,throwAsCaller(MException('PROCESSARGS:notCellStr ',sprintf('PROGRAMMER ERROR - you must pass to processArgs name/default pairs'))); end
     %% Remove * and + Markers
     try
     progArgNames(required | typecheck)  =    ...
@@ -131,16 +131,16 @@ function varargout = processArgsGV(userArgs, varargin)
     defaults = varargin(2:2:end);
     varargout = defaults;
     %% Check Programmer Supplied Arguments
-    if mod(numel(varargin),2)                                              ,throwAsCaller(MException('PROCESSARGSGV:oddNumArgs',sprintf('PROGRAMMER ERROR - you have passed in an odd number of arguments to processArgsGV, which requires name/default pairs')));  end
-    if any(cellfun(@isempty,progArgNames))                                 ,throwAsCaller(MException('PROCESSARGSGV:emptyStrName ',sprintf('PROGRAMMER ERROR - empty-string names are not allowed')));end
-    if nargout ~= 1 && nargout ~= maxNargs                                 ,throwAsCaller(MException('PROCESSARGSGV:wrongNumOutputs',sprintf('PROGRAMMER ERROR - processArgsGV requires the same number of output arguments as named/default input pairs'))); end
+    if mod(numel(varargin),2)                                              ,throwAsCaller(MException('PROCESSARGS:oddNumArgs',sprintf('PROGRAMMER ERROR - you have passed in an odd number of arguments to processArgs, which requires name/default pairs')));  end
+    if any(cellfun(@isempty,progArgNames))                                 ,throwAsCaller(MException('PROCESSARGS:emptyStrName ',sprintf('PROGRAMMER ERROR - empty-string names are not allowed')));end
+    if nargout ~= 1 && nargout ~= maxNargs                                 ,throwAsCaller(MException('PROCESSARGS:wrongNumOutputs',sprintf('PROGRAMMER ERROR - processArgs requires the same number of output arguments as named/default input pairs'))); end
     if ~isempty(PREFIX)             && ...
        ~all(cellfun(@(c)~isempty(c) &&...
         c(1)==PREFIX,progArgNames)) 
-                                                                            throwAsCaller(MException('PROCESSARGSGV:missingPrefix',sprintf('PROGRAMMER ERROR - processArgsGV requires that each argument name begin with the prefix %s',PREFIX))); 
+                                                                            throwAsCaller(MException('PROCESSARGS:missingPrefix',sprintf('PROGRAMMER ERROR - processArgs requires that each argument name begin with the prefix %s',PREFIX))); 
     end
     if FULL_ERROR_CHECK  && ...
-       numel(unique(progArgNames)) ~= numel(progArgNames)                  ,throwAsCaller(MException('PROCESSARGSGV:duplicateName',sprintf('PROGRAMMER ERROR - you can not use the same argument name twice')));end
+       numel(unique(progArgNames)) ~= numel(progArgNames)                  ,throwAsCaller(MException('PROCESSARGS:duplicateName',sprintf('PROGRAMMER ERROR - you can not use the same argument name twice')));end
 %% PROCESS USERARGS
 
     %% Error Check User Args
@@ -151,7 +151,7 @@ function varargout = processArgsGV(userArgs, varargin)
     end
     if FULL_ERROR_CHECK 
      % slow, but helpful in transition from process_options to
-     % processArgsGV
+     % processArgs
      % checks for missing '-' 
         if ~isempty(PREFIX)
             userstrings = lower(...
@@ -159,8 +159,8 @@ function varargout = processArgsGV(userArgs, varargin)
             problem = ismember(...
                 userstrings,cellfuncell(@(c)c(2:end),progArgNames));
             if any(problem)
-                if sum(problem) == 1,                                       warning('processArgsGV:missingPrefix','The specified value ''%s'', matches an argument name, except for a missing prefix %s. It will be interpreted as a value, not a name.',userstrings{problem},PREFIX)
-                else                                                        warning('processArgsGV:missingPrefix','The following values match an argument name, except for missing prefixes %s:\n\n%s\n\nThey will be interpreted as values, not names.',PREFIX,catString(userstrings(problem)));
+                if sum(problem) == 1,                                       warning('processArgs:missingPrefix','The specified value ''%s'', matches an argument name, except for a missing prefix %s. It will be interpreted as a value, not a name.',userstrings{problem},PREFIX)
+                else                                                        warning('processArgs:missingPrefix','The following values match an argument name, except for missing prefixes %s:\n\n%s\n\nThey will be interpreted as values, not names.',PREFIX,catString(userstrings(problem)));
                 end
             end
         end
@@ -172,14 +172,14 @@ function varargout = processArgsGV(userArgs, varargin)
     %% Check User Arg Names                                  
     if ~isempty(userArgNamesNDX) && ...
        ~isequal(userArgNamesNDX,userArgNamesNDX(1):2:numel(userArgs)-1)
-        if isempty(PREFIX),                                                 throwAsCaller(MException('PROCESSARGSGV:missingVal',sprintf('\n(1) every named argument must be followed by its value\n(2) no positional argument may be used after the first named argument\n')));
-        else                                                                throwAsCaller(MException('PROCESSARGSGV:posArgAfterNamedArg',sprintf('\n(1) every named argument must be followed by its value\n(2) no positional argument may be used after the first named argument\n(3) every argument name must begin with the ''%s'' character\n(4) values cannot be strings beginning with the %s character\n',PREFIX,PREFIX))); 
+        if isempty(PREFIX),                                                 throwAsCaller(MException('PROCESSARGS:missingVal',sprintf('\n(1) every named argument must be followed by its value\n(2) no positional argument may be used after the first named argument\n')));
+        else                                                                throwAsCaller(MException('PROCESSARGS:posArgAfterNamedArg',sprintf('\n(1) every named argument must be followed by its value\n(2) no positional argument may be used after the first named argument\n(3) every argument name must begin with the ''%s'' character\n(4) values cannot be strings beginning with the %s character\n',PREFIX,PREFIX))); 
         end
     end
      if FULL_ERROR_CHECK          && ...
         ~isempty(userArgNamesNDX) && ...
          numel(unique(userArgs(userArgNamesNDX))) ~= numel(userArgNamesNDX)
-                                                                            throwAsCaller(MException('PROCESSARGSGV:duplicateUserArg',sprintf('You have specified the same argument name twice')));
+                                                                            throwAsCaller(MException('PROCESSARGS:duplicateUserArg',sprintf('You have specified the same argument name twice')));
      end
     %% Extract Positional Args 
     argsProvided = false(1,maxNargs);
