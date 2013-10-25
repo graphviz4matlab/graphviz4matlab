@@ -554,6 +554,13 @@ classdef graphViz4Matlab < handle
             else
                 indices = unique(indices);
             end
+            % Get to and from labels of all edges in the graph
+            to_labels = cell(obj.nedges,1);
+            from_labels = cell(obj.nedges,1);
+            for i=1:obj.nedges
+              to_labels(i) = { obj.edgeArray(i).to.label };
+              from_labels(i) = { obj.edgeArray(i).from.label };
+            end
             for i=1:numel(indices)
                 edge = obj.edgeArray(indices(i));
                 [X,Y,Xarrow,Yarrow] = obj.calcPositions(edge);
@@ -574,6 +581,18 @@ classdef graphViz4Matlab < handle
                         if ~isempty(edgeCol); edgeColor = edgeCol{1}; end
                     end
                 end
+                normal = [diff(Y); - diff(X)];
+                normal = normal / norm(normal);
+                % If the edge reverse to the current one appears as well, slightly offset the coordinates
+                ix1 = findString(edge.from.label,to_labels);
+                ix2 = findString(edge.to.label,from_labels);
+                if any(ix1 & ix2)
+                  edge_offset = 0.004;
+                  X = X + edge_offset*normal(1);
+                  Y = Y + edge_offset*normal(2);
+                  Xarrow = Xarrow + edge_offset*normal(1);
+                  Yarrow = Yarrow + edge_offset*normal(2);
+                end
                 edge.arrow = plot(X,Y,'LineStyle',obj.edgeLineStyle,'LineWidth',2,'HitTest','off','Color',edgeColor);
                 if(~obj.undirected)
                     arrowHead = obj.displayArrowHead(X,Y,Xarrow,Yarrow,edgeColor);
@@ -585,8 +604,6 @@ classdef graphViz4Matlab < handle
                     edgeLab = candidates(findString(edge.to.label,candidates(:,2)),3);
                     if ~isempty(edgeLab); edgeLabel = edgeLab{1}; end
                 end
-                normal = [diff(Y); - diff(X)];
-                normal = normal / norm(normal);
                 edge.label = text(mean(X)+0.02*normal(1),mean(Y)+0.02*normal(2),edgeLabel,'FontSize',round(obj.fontSize*2/3),'HorizontalAlignment','center','Rotation',-90+atan2(normal(2),normal(1))*180/pi);
                 hold off;
                 obj.edgeArray(indices(i)) = edge;
