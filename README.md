@@ -2,8 +2,9 @@ graphviz4matlab
 ===============
 
 Matlab interface to 
-<http://www.graphviz.org/>
-Graphviz graph layout package. Allows interactive editing of the resulting graphs.
+[Graphviz]
+(http://www.graphviz.org/)
+graph layout package. Allows interactive editing of the resulting graphs.
 
 GraphViz4Matlab is a MATLAB software package to display directed and undirected graphs within a figure window, written by Matt Dunham and Kevin Murphy (with contributions from Leon Peshkin and Dan Eaton). A number of layout algorithms are provided, most requiring that the free graphViz software be installed. Nodes can be interactively moved around and resized with the mouse, and layouts can be changed on the fly. This is quite similar to Matlab's view method for the biograph class in the bioinformatics toolbox. Requires Matlab version 7.6 (2008a) or newer.
 
