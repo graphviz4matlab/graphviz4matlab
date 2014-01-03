@@ -4,7 +4,7 @@ function g = drawNetwork(varargin)
 % the layout algorithm. The best layout algorithms require that graphViz be
 % installed, available free at <http://www.graphviz.org>.
 %%
-% Type doc graphViz4Matlab for more details.
+% Type "doc graphViz4Matlab" for more details.
 
     g = graphViz4Matlab(varargin{:}); 
   
