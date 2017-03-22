@@ -92,16 +92,20 @@ classdef Gvizlayout < Abstractlayout
             text = textscan(fid,'%s','delimiter','\n'); 
             fclose(fid);
             text = text{:};
-            [start,dims] = strtok(text{cellfun(@(x)~isempty(x),strfind(text,'graph [bb="'))},'"');
-            dims = textscan(strtok(dims,'"'),'%n','delimiter',',');
-            dims = dims{:}';
-            text(cellfun(@(x)~isempty(x),strfind(text,' -> ')))=[]; % delete edge info, we don't need it
-            text(cellfun(@(x)isempty(x),strfind(text,'pos')))=[];   % keep only positions
-            [start,remaining] = strtok(text,'"');
-            [locations,remaining] = strtok(remaining,'"');
-            locations = cellfun(@(str)textscan(str,'%n','delimiter',','),locations,'UniformOutput',false);
-            locations = [locations{:}];
-            locations = [locations{:}]';
+            
+            % Read Graphviz dimensions
+            dim_text = text{strncmp(text, 'graph [bb="', 11)};
+            dims = sscanf(dim_text(12:end),'%f,')';
+            
+            % Read the position of nodes
+            location_tokens = regexp(horzcat(text{:}), ';([0-9]+)\s+\[[^\]]*pos="(-?[0-9\.]+),(-?[0-9\.]+)"', 'tokens');
+            location_tokens = vertcat(location_tokens{:});
+            
+            % Convert to numeric values
+            node_idx = sscanf(strjoin(location_tokens(:,1)), '%d');            
+            locations = reshape(sscanf(strjoin(location_tokens(:,2:3)), '%f'),[],2);            
+            locations(node_idx,:) = locations; % reorder based on id
+                        
             obj.scaleLocations(locations,dims);
        end
        
